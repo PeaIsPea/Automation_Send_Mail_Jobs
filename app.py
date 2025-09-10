@@ -205,8 +205,8 @@ def apply(job_id):
             }
 
             # QUAN TRỌNG: Dán URL Webhook (Test hoặc Production) của bạn vào đây
-            #webhook_url = "http://localhost:5678/webhook-test/2a11c345-1c6c-47f3-9983-e32ac4609bf4"
-            webhook_url = "http://localhost:5678/webhook/2a11c345-1c6c-47f3-9983-e32ac4609bf4"
+            #webhook_url = "http://localhost:5678/webhook-test/2a11c345-1c6c-47f3-9983-e32ac4609bf4" #This is Test
+            webhook_url = "http://localhost:5678/webhook/2a11c345-1c6c-47f3-9983-e32ac4609bf4" # This is Production
             
             response = requests.post(webhook_url, json=payload)
             
