@@ -1,0 +1,231 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2a11c345-1c6c-47f3-9983-e32ac4609bf4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c4d25d21-f129-435f-bc08-530921efac36",
+      "name": "Webhook",
+      "webhookId": "2a11c345-1c6c-47f3-9983-e32ac4609bf4"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/files/{{ $json.body.cv_path.split('\\\\').pop() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bf33d8da-a989-4fbb-9bfb-7450ad0cdc95",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=Phân tích và so sánh CV đính kèm sau đây với Mô tả công việc (JD) bên dưới.\nHãy đánh giá mức độ phù hợp của ứng viên theo thang điểm 100.\nChỉ trả về một đối tượng JSON duy nhất, không giải thích gì thêm, với định dạng sau: {\"score\": <điểm số>, \"summary\": \"<đoạn giải thích ngắn gọn bằng tiếng Việt về điểm mạnh, điểm yếu và lý do cho điểm số>\"}.\n\nMô tả công việc (JD): \n{{ $node[\"Webhook\"].json.body.job_description }}",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -80
+      ],
+      "id": "1128611f-b9ef-48be-a6b6-58d5fc39c4a1",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Yma9dpZpF8VJ3lDS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy chuỗi JSON từ output của node Gemini\nconst rawText = $input.item.json.content.parts[0].text;\n\n// Loại bỏ các ký tự ```json và ``` ở đầu và cuối chuỗi\nconst cleanedText = rawText.replace(/```json\\n/g, '').replace(/\\n```/g, '');\n\n// Chuyển đổi chuỗi đã được làm sạch thành đối tượng JSON\nconst parsedJson = JSON.parse(cleanedText);\n\n// Trả về đối tượng JSON để các node sau có thể sử dụng\nreturn parsedJson;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        176
+      ],
+      "id": "4c4751b4-0648-41d1-86e2-bdb17fa718ef",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca2ef76b-dc34-4f99-aba9-9b48e63a962c",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        -80
+      ],
+      "id": "6efb4f80-028e-4f96-9509-5aec46d69d74",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.candidate_email }}",
+        "subject": "=Về hồ sơ ứng tuyển vị trí {{ $node[\"Webhook\"].json.body.job_title }} tại PHC Company",
+        "message": "=<p>Chào bạn {{ $node[\"Webhook\"].json.body.candidate_name }},</p>  <p>Lời đầu tiên, PHC Company xin chân thành cảm ơn bạn đã dành thời gian quan tâm và nộp hồ sơ ứng tuyển cho vị trí <strong>{{ $node[\"Webhook\"].json.body.job_title }}</strong>.</p>  <p>Chúng tôi rất trân trọng sự quan tâm của bạn đối với công ty. Sau quá trình xem xét kỹ lưỡng, chúng tôi rất tiếc phải thông báo rằng hồ sơ của bạn chưa hoàn toàn phù hợp với các tiêu chí của vị trí này ở thời điểm hiện tại.</p>  <p>Quyết định này không phản ánh năng lực của bạn, bởi chúng tôi đã nhận được rất nhiều hồ sơ chất lượng cao cho vị trí này.</p>  <p>Chúng tôi sẽ xin phép lưu lại thông tin của bạn và sẽ liên hệ ngay khi có vị trí khác phù hợp hơn trong tương lai.</p>  <p>Một lần nữa, cảm ơn bạn rất nhiều. Chúc bạn sẽ sớm tìm được công việc như ý.</p>  <p>Trân trọng,<br> Bộ phận Tuyển dụng<br> PHC Company</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        176
+      ],
+      "id": "2d71125c-6d97-4abd-9c03-ce3434b144ca",
+      "name": "Reject",
+      "webhookId": "7a0dec72-bd72-41aa-93bd-fe896dcb5568",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iO6H5X9CwqV0NpYm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.candidate_email }}",
+        "subject": "=Thư mời phỏng vấn vị trí {{ $('Webhook').item.json.body.job_title }} tại PhC Company",
+        "message": "=<p>Chào bạn {{ $node[\"Webhook\"].json.body.candidate_name }},</p>\n\n<p>Cảm ơn bạn đã quan tâm và ứng tuyển vào vị trí <strong>{{ $('Webhook').item.json.body.job_title }}</strong> tại MyCompany.</p>\n\n<p>Sau khi xem xét hồ sơ, chúng tôi rất ấn tượng với kinh nghiệm và kỹ năng của bạn. Chúng tôi trân trọng mời bạn tham gia buổi phỏng vấn online cùng đội ngũ tuyển dụng để trao đổi chi tiết hơn về vị trí này cũng như về cơ hội phát triển tại công ty.</p>\n\n<p>Vui lòng cho chúng tôi biết khung thời gian phù hợp với bạn trong tuần này hoặc tuần tới để chúng tôi có thể sắp xếp lịch phỏng vấn.</p>\n\n<p>Chúc bạn một ngày tốt lành và mong sớm nhận được phản hồi từ bạn.</p>\n\n<p>Trân trọng,<br>\nBộ phận Tuyển dụng<br>\nPhC Company</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        -176
+      ],
+      "id": "46bdc9a2-f298-4592-b131-50cd5505d7a3",
+      "name": "Reply",
+      "webhookId": "1dd05b12-0b92-4e1a-832a-9466ddcfe44a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iO6H5X9CwqV0NpYm",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d5a93af6-b196-4307-8e4c-ee5e1d8ed50b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "41be709b4889fcb7eb8b1b881be64b7093c192cb8dd5a65e6bbc63402d820504"
+  },
+  "id": "JGyT2HYJzUiyNEQE",
+  "tags": []
+}

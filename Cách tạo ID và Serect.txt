@@ -1,0 +1,7 @@
+Cách tạo ID và Serect:
+B1 : truy cập https://console.cloud.google.com/apis/credentials
+B2 : chọn Create Project đặt tên cho dự án
+B3: Chọn Enabled APIs & services -> + Enable APIs and services -> Tìm kiếm "Gmail API" -> Enable
+B4 : Quay lại chọn -> OAuth consent screen -> Get Started và điền đầy đủ thông tin (NHớ chọn External)
+B5 : chọn Creare OAuth client -> Web application , phần Authorized redirect URIs thì Quay lại tab n8n của bạn, sao chép (copy) giá trị trong ô OAuth Redirect URL
+B6: Chọn Audience và chọn Test users thêm địa chỉ email vào để cấp quyền sau đó quay lại n8n có hiển thị ô đăng nhập Google

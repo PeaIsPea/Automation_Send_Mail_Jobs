@@ -1,0 +1,42 @@
+{% extends "public/layout.html" %}
+
+{% block extra_styles %}
+<style>
+    .page-header h1 { font-size: 2.5em; text-align: center; margin-bottom: 40px; }
+    .job-listing { list-style: none; padding: 0; }
+    .job-item { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 25px; transition: box-shadow 0.3s, transform 0.3s; }
+    .job-item:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-5px); }
+    .job-item a { text-decoration: none; color: inherit; display: block; }
+    .job-title { font-size: 1.5em; color: #007bff; margin: 0 0 10px 0; }
+    .job-meta { display: flex; gap: 20px; color: #555; margin-bottom: 15px; }
+    .job-description-preview { color: #666; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Vị trí đang tuyển dụng</h1>
+</div>
+
+<ul class="job-listing">
+    {% for job in jobs %}
+    <li class="job-item">
+        <a href="{{ url_for('job_detail', job_id=job.id) }}">
+            <h2 class="job-title">{{ job.title }}</h2>
+            <div class="job-meta">
+                <span>📍 {{ job.location }}</span>
+                <span>📦 {{ job.team }}</span>
+                <span>🕒 {{ job.job_type }}</span>
+            </div>
+            <p class="job-description-preview">
+                {{ job.description | striptags | truncate(150) }}
+            </p>
+        </a>
+    </li>
+    {% else %}
+    <li class="job-item" style="text-align: center;">
+        <p>Hiện tại chúng tôi chưa có vị trí nào đang tuyển. Vui lòng quay lại sau!</p>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

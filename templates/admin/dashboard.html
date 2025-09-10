@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .btn { padding: 10px 15px; border-radius: 5px; text-decoration: none; color: white; }
+        .btn-primary { background-color: #007bff; }
+        .btn-logout { background-color: #6c757d; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .actions { display: flex; gap: 15px; align-items: center;}
+        .actions a { text-decoration: none; color: #007bff; font-weight: bold; }
+        .actions form { margin: 0; }
+        .delete-btn { background: none; border: none; color: #dc3545; cursor: pointer; padding: 0; font-family: sans-serif; font-size: 1em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Quản lý Tuyển dụng</h1>
+        <div>
+            <a href="{{ url_for('add_job') }}" class="btn btn-primary">Thêm công việc mới</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Đăng xuất</a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 20px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tiêu đề</th>
+                <th>Team</th>
+                <th>Loại hình</th>
+                <th>Ngày đăng</th>
+                <th>Hạn chót</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.team }}</td>
+                <td>{{ job.job_type }}</td>
+                <td>{{ job.posted_at.strftime('%d-%m-%Y') }}</td>
+                <td>{{ job.deadline_at.strftime('%d-%m-%Y') if job.deadline_at else 'N/A' }}</td>
+                <td>{% if job.is_active %}Đang hiển thị{% else %}Đã ẩn{% endif %}</td>
+                <td class="actions">
+                    <a href="{{ url_for('edit_job', job_id=job.id) }}">Sửa</a>
+                    <form action="{{ url_for('delete_job', job_id=job.id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
+                        <button type="submit" class="delete-btn">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center;">Chưa có công việc nào.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

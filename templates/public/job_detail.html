@@ -1,0 +1,83 @@
+{% extends "public/layout.html" %}
+
+{% block extra_styles %}
+<style>
+    .job-header { border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 30px; }
+    .job-header h1 { font-size: 2.8em; margin: 0 0 10px 0; }
+    .job-meta-detail { display: flex; gap: 20px; color: #555; font-size: 1.1em; }
+    .job-content { line-height: 1.8; }
+    .apply-section { background-color: #f0f8ff; padding: 30px; margin-top: 40px; border-radius: 8px; text-align: center; }
+    .apply-section h2 { margin-top: 0; }
+    /* CSS cho JD được định dạng tốt hơn */
+    .job-content h2, .job-content h3 { margin-top: 30px; }
+    .job-content ul { padding-left: 20px; }
+    .apply-section { text-align: left; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .submit-btn { background-color: #007bff; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.1em; cursor: pointer; width: 100%; transition: background-color 0.3s; }
+    .submit-btn:hover { background-color: #0056b3; }
+</style>
+{% endblock %}
+
+{% block content %}
+<article>
+    <header class="job-header">
+        <h1>{{ job.title }}</h1>
+        <div class="job-meta-detail">
+            <span><strong>Vị trí:</strong> {{ job.location }}</span>
+            <span><strong>Team:</strong> {{ job.team }}</span>
+            <span><strong>Loại hình:</strong> {{ job.job_type }}</span>
+        </div>
+    </header>
+    
+    <section class="job-content">
+        {{ job.description | safe }}
+    </section>
+
+    <section class="apply-section" id="apply-form">
+        <h2>Ứng tuyển ngay</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #d4edda; color: #155724;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('apply', job_id=job.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="first_name">Tên*</label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Họ*</label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email*</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cover_letter">Giới thiệu thêm về bản thân*</label>
+                <textarea id="cover_letter" name="cover_letter" rows="6" placeholder="Những kỹ năng, dự án hoặc thành tựu nào khiến bạn là một ứng viên sáng giá cho vị trí này?" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cv">Tải lên CV (FILE PDF)*</label>
+                <input type="file" id="cv" name="cv" accept=".pdf" required>
+            </div>
+            <button type="submit" class="submit-btn">Nộp hồ sơ</button>
+        </form>
+    </section>
+</article>
+{% endblock %}

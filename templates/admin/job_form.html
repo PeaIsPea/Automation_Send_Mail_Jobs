@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+     <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        .form-container { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="date"], textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        textarea { height: 200px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+        .btn-success { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <div class="form-container">
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="title">Tiêu đề công việc</label>
+                <input type="text" id="title" name="title" value="{{ job.title if job else '' }}" required>
+            </div>
+            <div class="form-group">
+    <label for="location">Vị trí (Location)</label>
+    <input type="text" id="location" name="location" value="{{ job.location if job else 'Ho Chi Minh City' }}" required>
+</div>
+
+            <div class="form-group">
+                <label for="job_type">Loại hình (Type)</label>
+                <select id="job_type" name="job_type" required>
+                    {% set job_types = ['Full-time', 'Part-time', 'Internship', 'Contract'] %}
+                    {% for type in job_types %}
+                        <option value="{{ type }}" {% if job and job.job_type == type %}selected{% endif %}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="team">Team/Bộ phận</label>
+                <select id="team" name="team" required>
+                    {% set teams = ['Engineering', 'Product', 'Data Science', 'Testing', 'Marketing'] %}
+                    {% for t in teams %}
+                        <option value="{{ t }}" {% if job and job.team == t %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô tả chi tiết (JD)</label>
+                <textarea id="description" name="description" rows="15" required 
+                        placeholder="Sử dụng HTML để định dạng: <h2>Tiêu đề</h2>, <p>Đoạn văn</p>, <ul><li>Gạch đầu dòng</li></ul>, <strong>Chữ đậm</strong>">
+                    {{ job.description if job else '' }}
+                </textarea>
+            </div>
+            <div class="form-group">
+                <label for="deadline_at">Ngày hết hạn (để trống nếu không có)</label>
+                <input type="date" id="deadline_at" name="deadline_at" value="{{ job.deadline_at.strftime('%Y-%m-%d') if job and job.deadline_at else '' }}">
+            </div>
+            {% if job %}
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_active" {% if job.is_active %}checked{% endif %}>
+                    Đang hiển thị
+                </label>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-success">Lưu lại</button>
+            <a href="{{ url_for('dashboard') }}" style="margin-left: 10px;">Hủy</a>
+        </form>
+    </div>
+</body>
+</html>
