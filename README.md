@@ -46,8 +46,8 @@ chỉnh, tích hợp trí tuệ nhân tạo để tự động hóa quy trình s
 #### 1. Clone repository:
 
 ```bash
-git clone <URL_repository_cua_ban>
-cd <ten_repository>
+git clone https://github.com/PeaIsPea/Automation_Send_Mail_Jobs
+cd Automation_Send_Mail_Jobs
 ```
 
 #### 2. Cài đặt Backend (Flask):
